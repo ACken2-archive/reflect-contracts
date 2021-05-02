@@ -359,6 +359,7 @@ contract REFLECT is Context, IERC20, Ownable {
     }
 
     // Get the current reflection and token supply
+    // P.S. Reflection and token owned by excluded address is NOT counted in the current supply
     function _getCurrentSupply() private view returns(uint256, uint256) {
         // Set rSupply and tSupply as current maximum supply of reflection and token
         uint256 rSupply = _rTotal;
@@ -372,8 +373,11 @@ contract REFLECT is Context, IERC20, Ownable {
             rSupply = rSupply.sub(_rOwned[_excluded[i]]);
             tSupply = tSupply.sub(_tOwned[_excluded[i]]);
         }
-        // I am still figuring this out, not sure what it did
+        // Again, this statement should usually never be true unless almost all reflection is excluded
+        // Since rSupply = rTotal - (reflection owned by excluded address rE),
+        // this condition only satisfy when rE ~ rT (i.e. about 99.9999% of reflection supply owned by excluded address)
         if (rSupply < _rTotal.div(_tTotal)) return (_rTotal, _tTotal);
+        // Return current reflection and token supply
         return (rSupply, tSupply);
     }
 }
